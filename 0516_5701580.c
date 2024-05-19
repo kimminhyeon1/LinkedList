@@ -15,18 +15,18 @@ void error(char* message) {
 }
 ListNode* get_pre_link(ListNode* head, int pos) {
 	ListNode* pre = (ListNode*)malloc(sizeof(ListNode));
-	pre = head;
-	for (int i = 0; i < pos; i++) {
+	pre->link = head;
+	for (int i = 0; i < pos-1; i++) {
 		pre = pre->link;
 	}
-	return head;
+	return pre;
 }
 ListNode* insert_first(ListNode* head, int value) {
 	ListNode* p = (ListNode*)malloc(sizeof(ListNode));
 	p->data = value;
 	p->link = head;
 	head = p;
-	p->move_count = 1;
+	head->move_count = 1;
 	return head;
 }
 ListNode* insert(ListNode* head, ListNode* pre, element value, int pos) {
@@ -34,7 +34,7 @@ ListNode* insert(ListNode* head, ListNode* pre, element value, int pos) {
 	p->data = value;
 	p->link = pre->link;
 	pre->link = p;
-	p->move_count = pos;
+	head->move_count = pos;
 	return head;
 }
 ListNode* delete_first(ListNode* head) {
@@ -43,13 +43,15 @@ ListNode* delete_first(ListNode* head) {
 	removed = head;
 	head = removed->link;
 	free(removed);
+	head->move_count = 1;
 	return head;
 }
-ListNode* delete(ListNode* head, ListNode* pre) {
+ListNode* delete(ListNode* head, ListNode* pre, int pos) {
 	ListNode* removed;
 	removed = pre->link;
 	pre->link = removed->link;
 	free(removed);
+	head->move_count = pos;
 	return head;
 }
 void print_list(ListNode* head) {
@@ -59,10 +61,11 @@ void print_list(ListNode* head) {
 }
 int main(void) {
 	ListNode* head = (ListNode*)NULL;
-	int choice, num, position, move_count;
+	ListNode* pre;
+	int choice, num, position;
 
 	while (1) {
-		printf("메뉴:\n");
+		printf("\n메뉴:\n");
 		printf("1. 숫자를 위치에 삽입\n");
 		printf("2. 위치에서 숫자 삭제\n");
 		printf("3. 리스트 출력\n");
@@ -77,22 +80,27 @@ int main(void) {
 			printf("삽입할 위치를 입력하세요: ");
 			scanf("%d", &position);
 			if (position == 0) {
-				//insert_first
 				head = insert_first(head, num);
 			}
 			else {
-
-				head = insert(head, position , num);
+				pre = get_pre_link(head, position);
+				head->move_count = pre->move_count;
+				head = insert(head, pre , num, position);
 			}
 			printf("삽입시 링크를 따라 이동한 횟수: %d\n", head->move_count);
-			break;
+			break;   
 		case 2:
+			printf("삭제할 위치를 입력하세요: ");
+			scanf("%d", &position);
 			if (position == 0) {
-				//delete_first
+				head = delete_first(head);
 			}
 			else {
-
+				pre = get_pre_link(head, position);
+				head->move_count = pre->move_count;
+				head = delete(head, pre, position);
 			}
+			printf("삭제시 링크를 따라 이동한 횟수: %d\n", head->move_count);
 			break;
 		case 3:
 			print_list(head);
